@@ -78,7 +78,7 @@ class DescontoColaborador extends AbstractTotal
 
         if ($funcionario) {
             $percent = 0.05;
-            $label = "Desconto para colaborador $percent%";
+            $label = 'Desconto para colaborador 5%';
             $TotalAmount = $total->getSubtotal();
             $TotalAmount *= number_format($percent, 2, '.', '');
 
