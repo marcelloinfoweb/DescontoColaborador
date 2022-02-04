@@ -46,6 +46,7 @@ class DescontoColaborador extends \Magento\Quote\Model\Quote\Address\Total\Abstr
         StoreManagerInterface $storeManager,
         Validator $validator,
         PriceCurrencyInterface $priceCurrency,
+        \Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
         Session $checkoutSession,
         Data $helper
     ) {
@@ -54,6 +55,7 @@ class DescontoColaborador extends \Magento\Quote\Model\Quote\Address\Total\Abstr
         $this->calculator = $validator;
         $this->storeManager = $storeManager;
         $this->priceCurrency = $priceCurrency;
+        $this->productRepository = $productRepository;
         $this->checkoutSession = $checkoutSession;
         $this->helper = $helper;
     }
@@ -72,10 +74,10 @@ class DescontoColaborador extends \Magento\Quote\Model\Quote\Address\Total\Abstr
         $funcionario = $this->helper->getIntegratorRmClienteFornecedor($cpfCliente);
 
         if ($funcionario) {
-            $percent = 5;
+            $percent = 0.05;
             $label = "Desconto para colaborador $percent%";
             $TotalAmount = $total->getSubtotal();
-            $TotalAmount /= $percent;
+            $TotalAmount *= number_format($percent, 2, '.', '');
 
             $discountAmount = "-" . $TotalAmount;
             $appliedCartDiscount = 0;
@@ -117,7 +119,7 @@ class DescontoColaborador extends \Magento\Quote\Model\Quote\Address\Total\Abstr
             $description = $total->getDiscountDescription();
             $result = [
                 'code' => $this->getCode(),
-                'title' => $description !== '' ? __('Discount (%1)', $description) : __('Discount'),
+                'title' => __('Discount (%1)', $description),
                 'value' => $amount
             ];
         }
