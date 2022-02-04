@@ -5,16 +5,18 @@ declare(strict_types=1);
 namespace Funarbe\DescontoColaborador\Model\Quote;
 
 use Funarbe\Helper\Helper\Data;
+use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\Event\ManagerInterface;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Quote\Api\Data\ShippingAssignmentInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Address\Total;
+use Magento\Quote\Model\Quote\Address\Total\AbstractTotal;
 use Magento\SalesRule\Model\Validator;
 use Magento\Store\Model\StoreManagerInterface;
 
-class DescontoColaborador extends \Magento\Quote\Model\Quote\Address\Total\AbstractTotal
+class DescontoColaborador extends AbstractTotal
 {
     /**
      * @var \Magento\Framework\Event\ManagerInterface
@@ -46,7 +48,7 @@ class DescontoColaborador extends \Magento\Quote\Model\Quote\Address\Total\Abstr
         StoreManagerInterface $storeManager,
         Validator $validator,
         PriceCurrencyInterface $priceCurrency,
-        \Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
+        ProductRepositoryInterface $productRepository,
         Session $checkoutSession,
         Data $helper
     ) {
@@ -70,6 +72,7 @@ class DescontoColaborador extends \Magento\Quote\Model\Quote\Address\Total\Abstr
         Total $total
     ) {
         parent::collect($quote, $shippingAssignment, $total);
+        //$address = $shippingAssignment->getShipping()->getAddress();
         $cpfCliente = $this->checkoutSession->getQuote()->getCustomer()->getTaxvat();
         $funcionario = $this->helper->getIntegratorRmClienteFornecedor($cpfCliente);
 
@@ -83,6 +86,7 @@ class DescontoColaborador extends \Magento\Quote\Model\Quote\Address\Total\Abstr
             $appliedCartDiscount = 0;
 
             if ($total->getDiscountDescription()) {
+                // If a discount exists in cart and another discount is applied, the add both discounts.
                 $appliedCartDiscount = $total->getDiscountAmount();
                 $discountAmount = $total->getDiscountAmount() + $discountAmount;
                 $label = $total->getDiscountDescription() . ', ' . $label;
@@ -119,7 +123,7 @@ class DescontoColaborador extends \Magento\Quote\Model\Quote\Address\Total\Abstr
             $description = $total->getDiscountDescription();
             $result = [
                 'code' => $this->getCode(),
-                'title' => __('Discount (%1)', $description),
+                'title' => $description !== '' ? __('Discount (%1)', $description) : __('Discount'),
                 'value' => $amount
             ];
         }
