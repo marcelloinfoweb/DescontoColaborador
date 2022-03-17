@@ -44,6 +44,7 @@ class DescontoColaborador extends AbstractTotal
     private Data $helper;
 
     public function __construct(
+        \Magento\Customer\Model\Session $customer,
         ManagerInterface $eventManager,
         StoreManagerInterface $storeManager,
         Validator $validator,
@@ -53,6 +54,7 @@ class DescontoColaborador extends AbstractTotal
         Data $helper
     ) {
         $this->setCode('campodescontocolaborador');
+        $this->customer = $customer;
         $this->eventManager = $eventManager;
         $this->calculator = $validator;
         $this->storeManager = $storeManager;
@@ -66,14 +68,12 @@ class DescontoColaborador extends AbstractTotal
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function collect(
-        Quote $quote,
-        ShippingAssignmentInterface $shippingAssignment,
-        Total $total
-    ) {
+    public function collect(Quote $quote, ShippingAssignmentInterface $shippingAssignment, Total $total) {
+
         parent::collect($quote, $shippingAssignment, $total);
-        //$address = $shippingAssignment->getShipping()->getAddress();
-        $cpfCliente = $this->checkoutSession->getQuote()->getCustomer()->getTaxvat();
+        // $address = $shippingAssignment->getShipping()->getAddress();
+        // $cpfCliente = $this->checkoutSession->getQuote()->getCustomer()->getTaxvat();
+        $cpfCliente = $this->customer->getCustomer()->getTaxvat();
         $funcionario = $this->helper->getIntegratorRmClienteFornecedor($cpfCliente);
 
         if ($funcionario) {
